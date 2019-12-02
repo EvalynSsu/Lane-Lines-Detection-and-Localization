@@ -179,4 +179,4 @@ def demotest(filePath):
 # uncomment below code to process a image or a video
 
 # demotest("test_images/straight_lines2.jpg")
-# process_Video('test_videos_output/test1.mp4', "harder_challenge_video.mp4")
+process_Video('test_videos_output/test1.mp4', "harder_challenge_video.mp4")
