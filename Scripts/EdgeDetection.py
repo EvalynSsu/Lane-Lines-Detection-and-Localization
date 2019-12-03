@@ -36,10 +36,43 @@ class EdgeTransFormer:
         # cv2.imwrite("edge/combo_4.jpg", dir_binary*255)
 
         combined = np.zeros_like(dir_binary)
-        combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1)) & (S_binary == 1)] = 1
+        combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1)) | (S_binary == 1)] = 1
         # combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
 
         return combined
+
+
+
+    def getBinary_debug(self, sobel_kernel=3, mag_thresh_gradx=(20, 100), mag_thresh_grady=(20, 100), mag_thresh_magBin=(40, 100), mag_thresh_dir=(0.7, 1.3)):
+
+        # Apply each of the thresholding functions
+        gray = self.gray
+        image = self.image
+        self.ksize = sobel_kernel
+
+        gradx = self.abs_sobel_thresh(gray, orient='x', sobel_kernel=self.ksize, thresh=mag_thresh_gradx)
+        grady = self.abs_sobel_thresh(gray, orient='y', sobel_kernel=self.ksize, thresh=mag_thresh_grady)
+        mag_binary = self.mag_thresh(gray, sobel_kernel=9, mag_thresh=mag_thresh_magBin)
+        dir_binary = self.dir_threshold(gray, sobel_kernel=15, thresh=mag_thresh_dir)
+        S_binary = self.get_S(image)
+
+        # for trying different parameters
+        # cv2.imwrite("edge/combo_1.jpg", gradx*255)
+        # cv2.imwrite("edge/combo_2.jpg", grady*255)
+        # cv2.imwrite("edge/combo_3.jpg", mag_binary*255)
+        # cv2.imwrite("edge/combo_4.jpg", dir_binary*255)
+
+        combined_0 = np.zeros_like(dir_binary)
+        combined_1 = np.zeros_like(dir_binary)
+        combined_2 = np.zeros_like(dir_binary)
+        combined_3 = np.zeros_like(dir_binary)
+
+        combined_0[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1)) & (S_binary == 1)] = 1
+        combined_1[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1)) | (S_binary == 1)] = 1
+        combined_2[((gradx == 1) & (grady == 1))] = 1
+        combined_3[((mag_binary == 1) & (dir_binary == 1))] = 1
+
+        return combined_0, combined_1, combined_2, combined_3
 
     def abs_sobel_thresh(self, gray, orient='x', sobel_kernel=3, thresh=(0, 255)):
         # Calculate directional gradient

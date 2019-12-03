@@ -31,6 +31,14 @@ def draw_img2img(image):
     gray = cv2.cvtColor(undistort,cv2.COLOR_BGR2GRAY)
     edgeT = EdgeTransFormer(gray, undistort)
     binaryRst = edgeT.getBinary()
+
+    # debuging
+    # b1 ,b2, b3, b4 = edgeT.getBinary_debug()
+    # cv2.imwrite("b1.jpg", b1*255)
+    # cv2.imwrite("b2.jpg", b2*255)
+    # cv2.imwrite("b3.jpg", b3*255)
+    # cv2.imwrite("b4.jpg", b4*255)
+
     tsf.resetDstPoints(binaryRst*255)
     warped_bin, M = tsf.warpImage(binaryRst*255)
 
@@ -50,14 +58,15 @@ def draw_img2img(image):
     # left_curverad, right_curverad = Polynomial.measure_curvature_pixels(ploty=ploty, left_fit=leftFit, right_fit=rightFit)
     # print(left_curverad, right_curverad)
 
-    left_curverad, right_curverad, bias = Polynomial.measure_curvature_real(ploty, leftFit, rightFit, bias)
+    left_curverad, right_curverad, bias = Polynomial.measure_curvature_real(ploty, current_fit[0], current_fit[1], bias)
     # print(left_curverad, right_curverad, bias)
 
-    radius = (left_curverad+right_curverad)/2
+    # radius = (left_curverad+right_curverad)/2
+    radius = min(left_curverad, right_curverad)
     isStable = lineDetector.add_rst(detected=True, fit=(leftFit, rightFit), radius=radius, bias=bias, linepix=ploty, frame=frame)
 
-    result = drawlines(warped_bin, undistort, left_fitx, right_fitx, ploty, bias, radius)
-
+    # result = drawlines(warped_bin, undistort, left_fitx, right_fitx, ploty, bias, radius)
+    result = drawlines(warped_bin, undistort, left_fitx, right_fitx, lineDetector.bestx, bias, lineDetector.radius_of_curvature)
     return result
 
 def drawlines(warpedBin, undistorImg, left_fitx, right_fitx, ploty, bias, radius):
@@ -97,7 +106,6 @@ def drawlines(warpedBin, undistorImg, left_fitx, right_fitx, ploty, bias, radius
 
 def process_image(image):
     # NOTE: The output you return should be a color image (3 channel) for processing video below
-    # TODO: put your pipeline here,
     # you should return the final output (image where lines are drawn on lanes)
     result = draw_img2img(image)
     return result
@@ -110,7 +118,7 @@ def process_Video(filePath, outPath):
     ## Where start_second and end_second are integer values representing the start and end of the subclip
     ## You may also uncomment the following line for a subclip of the first 5 seconds
     ##clip1 = VideoFileClip("test_videos/solidWhiteRight.mp4").subclip(0,5)
-    clip1 = VideoFileClip(outPath) # .subclip(41,42)
+    clip1 = VideoFileClip(outPath) #.subclip(47,49)
     white_clip = clip1.fl_image(process_image) #NOTE: this function expects color images!!
     white_clip.write_videofile(white_output, audio=False)
 
@@ -124,7 +132,7 @@ def demotest(filePath):
     cv2.imwrite("demo/distort.jpg",undistort)
 
     # if you want to manually set rectPoints for transformation by clicking
-    # tsf.start_gather(img)
+    tsf.start_gather(img)
     unwarpedImg, M = tsf.warpImage(undistort)
     cv2.imwrite("demo/transform.jpg", unwarpedImg)
 
@@ -134,6 +142,7 @@ def demotest(filePath):
     gray = cv2.cvtColor(undistort,cv2.COLOR_BGR2GRAY)
     edgeT = EdgeTransFormer(gray, undistort)
     binaryRst = edgeT.getBinary()
+
     cv2.imwrite("demo/combo_binary.jpg", binaryRst*255)
 
     tsf.resetDstPoints(binaryRst*255)
@@ -179,4 +188,4 @@ def demotest(filePath):
 # uncomment below code to process a image or a video
 
 # demotest("test_images/straight_lines2.jpg")
-process_Video('test_videos_output/test1.mp4', "harder_challenge_video.mp4")
+process_Video('test_videos_output/test2.mp4', "project_video.mp4")

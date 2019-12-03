@@ -2,8 +2,11 @@ import cv2
 import numpy as np
 
 def find_lane_pixels(binary_warped):
+
     # Take a histogram of the bottom half of the image
     histogram = np.sum(binary_warped[binary_warped.shape[0]//2:,:], axis=0)
+    # histogram = np.sum(binary_warped[binary_warped.shape[0]//3:binary_warped.shape[0]*2//3,:], axis=0)
+
     # Create an output image to draw on and visualize the result
     out_img = np.dstack((binary_warped, binary_warped, binary_warped))
     # Find the peak of the left and right halves of the histogram
@@ -14,7 +17,7 @@ def find_lane_pixels(binary_warped):
 
     # HYPERPARAMETERS
     # Choose the number of sliding windows
-    nwindows = 9
+    nwindows = 18#9
     # Set the width of the windows +/- margin
     margin = 100
     # Set minimum number of pixels found to recenter window
@@ -218,7 +221,7 @@ def measure_curvature_real(ploty, left_fit_cr, right_fit_cr, bias):
     # Define conversions in x and y from pixels space to meters
     # ym_per_pix = 30/720 # meters per pixel in y dimension
     ym_per_pix = 30/720# #100/720 # meters per pixel in y dimension
-    xm_per_pix = 3.7/700 # meters per pixel in x dimension
+    xm_per_pix = 3.7/640 # meters per pixel in x dimension
 
     # Define y-value where we want radius of curvature
     # We'll choose the maximum y-value, corresponding to the bottom of the image
@@ -229,6 +232,8 @@ def measure_curvature_real(ploty, left_fit_cr, right_fit_cr, bias):
     right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
 
     bias = bias*xm_per_pix
+
+    print('debugging curved: ', left_curverad, right_curverad)
 
     return left_curverad, right_curverad, bias
 

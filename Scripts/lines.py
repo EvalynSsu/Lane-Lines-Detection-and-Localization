@@ -32,6 +32,8 @@ class lines:
         self.ally = None
 
 
+
+
     def add_rst(self, detected, fit, radius, bias, linepix, frame):
 
         resonableCurve = self.isReasonable(fit)

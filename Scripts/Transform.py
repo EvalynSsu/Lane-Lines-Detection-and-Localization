@@ -3,7 +3,7 @@ import numpy as np
 
 class Transformer:
 
-    offset = 0 # offset for dst points
+    offset = 100 # offset for dst points
     # For source points I'm grabbing the outer four detected corners
 
     # initialize the list of reference points and boolean indicating
@@ -13,19 +13,26 @@ class Transformer:
     resizeScale = 0.5
     scaleFactor = 0.2
 
-    left_upper_corner = (568, 470)#(298-2, 230)#(230, 298)
-    right_upper_corner = (710, 470)#(363-10, 230)#(230, 363)
-    left_bottom_corner = (210, 710)#(144+20, 340)#(350, 144)
-    right_bottom_corner = (1074, 710)#(558-20, 340)#(350, 558)
+    transferMxt = [[ 593,  450], [ 691,  451], [1075,  690], [248,  690]]
+
+    # left_upper_corner = (639, 427)#(568, 470)#(298-2, 230)#(230, 298)
+    # right_upper_corner = (653, 427)#(710, 470)#(363-10, 230)#(230, 363)
+    # left_bottom_corner = (269, 676)#(210, 710)#(144+20, 340)#(350, 144)
+    # right_bottom_corner = (1046, 674)#(1074, 710)#(558-20, 340)#(350, 558)
+
+    left_upper_corner = transferMxt[0]
+    right_upper_corner = transferMxt[1]
+    left_bottom_corner = transferMxt[3]
+    right_bottom_corner = transferMxt[2]
 
     srcPoints = np.float32([left_upper_corner, right_upper_corner, right_bottom_corner,left_bottom_corner])*resizeScale
     srcPoints = srcPoints*(1/resizeScale)
 
     img_size = (1280, 720)
-    left_upper_corner = (img_size[0]*scaleFactor, 0) #(tsf.offset, img_size[0]*0.2)
-    right_upper_corner = (img_size[0]*(1-scaleFactor), 0) #(tsf.offset, img_size[0]*0.8)
-    left_bottom_corner = (img_size[0]*scaleFactor, img_size[1]) # (img_size[1]-tsf.offset, img_size[0]*0.2)
-    right_bottom_corner = (img_size[0]*(1-scaleFactor), img_size[1])#(img_size[1]-tsf.offset, img_size[0]*0.8)
+    left_upper_corner = (img_size[0]*scaleFactor, offset) #(tsf.offset, img_size[0]*0.2)
+    right_upper_corner = (img_size[0]*(1-scaleFactor), offset) #(tsf.offset, img_size[0]*0.8)
+    left_bottom_corner = (img_size[0]*scaleFactor, img_size[1]-offset) # (img_size[1]-tsf.offset, img_size[0]*0.2)
+    right_bottom_corner = (img_size[0]*(1-scaleFactor), img_size[1]-offset)#(img_size[1]-tsf.offset, img_size[0]*0.8)
     dstPoints = np.float32([left_upper_corner, right_upper_corner, right_bottom_corner, left_bottom_corner])
 
 
@@ -74,8 +81,8 @@ class Transformer:
         # Warp the image using OpenCV warpPerspective()
         warped = cv2.warpPerspective(undistort, M, self.img_size)
 
-        # print("src points:", self.srcPoints)
-        # print("dst points:", self.dstPoints)
+        print("src points:", self.srcPoints)
+        print("dst points:", self.dstPoints)
 
         return warped, M
 
