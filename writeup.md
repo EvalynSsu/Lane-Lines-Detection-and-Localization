@@ -36,22 +36,36 @@ The `resetDstPoints()` function can be called when a different output size is us
 The `warpImage()` function takes as inputs an image (`undistort`), using the pre-determined source and destination point sets from the parameters in the object.  I chose the hardcode the source and destination points in the following manner:
 
 ```python
+    offset = 100 # offset for dst points
+    # For source points I'm grabbing the outer four detected corners
+
+    # initialize the list of reference points and boolean indicating
+    # whether cropping is being performed or not
+    refPt = []
+    points = 0
     resizeScale = 0.5
     scaleFactor = 0.2
 
-    left_upper_corner = (568, 470)
-    right_upper_corner = (710, 470)
-    left_bottom_corner = (210, 710)
-    right_bottom_corner = (1074, 710)
+    transferMxt = [[ 593,  450], [ 691,  451], [1075,  690], [248,  690]]
 
-    srcPoints = np.float32([left_upper_corner, right_upper_corner, right_bottom_corner, left_bottom_corner])*resizeScale
+    # left_upper_corner = (639, 427)#(568, 470)#(298-2, 230)#(230, 298)
+    # right_upper_corner = (653, 427)#(710, 470)#(363-10, 230)#(230, 363)
+    # left_bottom_corner = (269, 676)#(210, 710)#(144+20, 340)#(350, 144)
+    # right_bottom_corner = (1046, 674)#(1074, 710)#(558-20, 340)#(350, 558)
+
+    left_upper_corner = transferMxt[0]
+    right_upper_corner = transferMxt[1]
+    left_bottom_corner = transferMxt[3]
+    right_bottom_corner = transferMxt[2]
+
+    srcPoints = np.float32([left_upper_corner, right_upper_corner, right_bottom_corner,left_bottom_corner])*resizeScale
     srcPoints = srcPoints*(1/resizeScale)
 
     img_size = (1280, 720)
-    left_upper_corner = (img_size[0]*scaleFactor, 0)     
-    right_upper_corner = (img_size[0]*(1-scaleFactor), 0)     
-    left_bottom_corner = (img_size[0]*scaleFactor, img_size[1]) 
-    right_bottom_corner = (img_size[0]*(1-scaleFactor), img_size[1])
+    left_upper_corner = (img_size[0]*scaleFactor, offset) #(tsf.offset, img_size[0]*0.2)
+    right_upper_corner = (img_size[0]*(1-scaleFactor), offset) #(tsf.offset, img_size[0]*0.8)
+    left_bottom_corner = (img_size[0]*scaleFactor, img_size[1]-offset) # (img_size[1]-tsf.offset, img_size[0]*0.2)
+    right_bottom_corner = (img_size[0]*(1-scaleFactor), img_size[1]-offset)#(img_size[1]-tsf.offset, img_size[0]*0.8)
     dstPoints = np.float32([left_upper_corner, right_upper_corner, right_bottom_corner, left_bottom_corner])
 
 ```
@@ -60,10 +74,10 @@ This resulted in the following source and destination points:
 
 | Source        | Destination   | 
 |:-------------:|:-------------:| 
-| 568, 470      | 256, 0        | 
-| 210, 710      | 256, 720      |
-| 1074, 710     | 1024, 720      |
-| 710, 460      | 1024, 0        |
+| 593, 450      | 256, 0        | 
+| 248, 690      | 256, 720      |
+| 1075, 690     | 1024, 720      |
+| 691, 451      | 1024, 0        |
 
 I verified that my perspective transform was working as expected by checking that the lines appear parallel in the warped image of the straight line testing image.
 
@@ -98,7 +112,7 @@ I implemented this step in lines #63 through #96 in my code in the function `dra
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](test_videos_output/project_video.mp4)
+Here's a [link to my video result](test_videos_output/project_video_2sSmooth.mp4)
 
 Some quick Notes for outliers. I detect outliers and mark them as red so that we can clearly distinguish when the function just mis-recognizes or when it can detect outliers and are able to do some optimization in the future.
 
